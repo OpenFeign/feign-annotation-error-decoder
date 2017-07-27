@@ -14,7 +14,7 @@ GitHub github = Feign.builder()
                      .target(GitHub.class, "https://api.github.com");
 ```
 
-##Leveraging the annotations and priority order
+## Leveraging the annotations and priority order
 For annotation decoding to work, the class must be annotated with `@ErrorHandling` tags.
 The tags are valid in both the class level as well as method level. They will be treated from 'most specific' to 
 'least specific' in the following order:
@@ -73,7 +73,7 @@ GitHub github = Feign.builder()
 ```
 
  
-##Complex Exceptions
+## Complex Exceptions
 
 Finally, Any exception can be used if they have a default constructor:
 
