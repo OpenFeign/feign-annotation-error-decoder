@@ -1,5 +1,7 @@
 Annotation Error Decoder
 =========================
+[![Join the chat at https://gitter.im/OpenFeign/feign](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/OpenFeign/feign?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/OpenFeign/feign-annotation-error-decoder.svg?branch=master)](https://travis-ci.org/OpenFeign/feign-annotation-error-decoder)
 
 This module allows to annotate Feign's interfaces with annotations to generate Exceptions based on error codes
 
