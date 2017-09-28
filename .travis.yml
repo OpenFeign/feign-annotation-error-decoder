@@ -1,54 +1,36 @@
-# Run `travis lint` when changing this file to avoid breaking the build.
-# Default JDK is really old: 1.8.0_31; Trusty's is less old: 1.8.0_51
-# https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
 sudo: required
 dist: trusty
-
 cache:
   directories:
-  - $HOME/.m2
-
+  - "$HOME/.m2"
 language: java
-
 jdk:
-  - oraclejdk8
-
-
+- oraclejdk8
 before_install:
-  # Parameters used during release
-  - git config user.name "$GH_USER"
-  - git config user.email "$GH_USER_EMAIL"
-  # setup https authentication credentials, used by ./mvnw release:prepare
-  - git config credential.helper "store --file=.git/credentials"
-  - echo "https://$GH_TOKEN:@github.com" > .git/credentials
-
+- git config user.name "$GH_USER"
+- git config user.email "$GH_USER_EMAIL"
+- git config credential.helper "store --file=.git/credentials"
+- echo "https://$GH_TOKEN:@github.com" > .git/credentials
 install:
-  # Override default travis to use the maven wrapper
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-
+- "./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V"
 script:
-  - ./travis/publish.sh
-
-# Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
-# See https://github.com/travis-ci/travis-ci/issues/1532
+- "./travis/publish.sh"
 branches:
   except:
-    - /^[0-9]/
-
+  - "/^[0-9]/"
 env:
   global:
   # Ex. travis encrypt BINTRAY_USER=your_github_account
-#  - secure: "TBD"
+  - secure: "hmNseTxacslbNsaEFk8GYuUHrj/rBwCVYVcvNwCPdOXLQLfulVTscnLzkPSvpUGPQT4Ge5eNAuvW24hrHpnEG6EptlB0NKLkbXydxuONLO9iv4SyOE7Tj+1nLeP/cAxUWomtvGfZM1K/km37wsOvUYZO6TMNWlADCDWzCjU4HW1p0qs5bRGC6YbmLpJ4CUtcHBoGkyU7hQmpbQD26QcbAq5bKyTOvHRJ2bkIbMlR92Cp03lGIGKNLxiCRLhW+xrenkggJlH3xqU60y7HwSaOfZk9q7Z66nvkq2CIEKvDyGLCU7yUqciQVHqzq5mR0HGVofcfBn1jwR7RlByUMwTVRf4/Il+lcetu21sCfJHXkZtY4RcEPSKxIpbPNt/T78x+qvt93jyx8mJSeE4vozCBmXe1Yi3f/Xr00qRB1Kgkk7CzwQLk0cn636ATNJx4VsQNNcZg0trxZuaIj6YCLmXw/TfkSZaLAOeuiqIEY30FWaTOubm1lJ4lP7KSRkU6Jsv1nz/U9jA44JWcDtA0+GRJHWL7EYY2yduLY5Bjp1x4iALGz3R21xGbOkYV7mJb++g+igyglkDFWYjL/QtNE0hh3wpl0V0bqzpcoW5FPqfH2kWT5OCtaNP76om2BxiEQhRv606nxPGj4pGg6cXKKpu8yfiKwedekDhE6GRImJWYBqs="
 #  # Ex. travis encrypt BINTRAY_KEY=xxx-https://bintray.com/profile/edit-xxx --add
-#  - secure: "TBD"
+  - secure: "ku8ovDd8qcrFzndhpgybKz2hNT6I/OGq2fjiTVYb7bmdkW6v/AYSvCAEOPhuuKTlu3RJVPAWio9VGJ8VcOJqBmBnpMSTw6xkA+Gc1fxvqcpjmS03lhh3iQYF7l2kKF3akNI9+5CSdoF/hbmCI7Xl8FCcOlaJo0cyBW2RnsSr+kLUzuv/xGX2ClTQn7AqAocbRpJ93jbyyVP5giwD98Xy3jRe9ACQpyKhNrEj4M85fEDB8i98B9hQsMH9HvxsgtCBX1gqArHuLARvAs6ghB7o9eODfWAtjaDsGVSpVK6q4SUC/+QQjpDNPsRKfgKyiPEouSvsJ7hnxV8TDKUBV8ti3T84b054vFeOGZhOI4NFShW0YelgRIlahyFnAKfoFoYvLPHH7L3Bkg+sCnosk6UGcckh9iPQMjQ46acdRWK0IiV99pEUtXKCARH4hszUfG2+ZEPiszxx0ykq8n9t8vt0B/nTeZdj7Sg8a8T1woMooIlGUdHneY8Fsrv6XJx1gcB90PuZbxCCrt7Dl72Mv6v58iw3b2klo04XqWgKzPrlGK1l5cC2ossngRQ9BB1XJRbeV+vf+GEArXjnxlVYoybqHxQYHxazIAtrirWf2bNp8QRjI3lpzAtxg/BiqehdwLmOJlAHHHi9kqn4hBQgY1pIRZdlkASGe3Dfiqf3Uiw3CrI="
 #  # Ex. travis encrypt GH_USER_EMAIL=for_github@domain.com --add
-#  - secure: "TBD"
+  - secure: "MdgD3k9NZRdBMp0LmhZgp7Cx4z6lhlkF9v2ZMD12cUuonRIMZGs++3rHXzOmGRngkz25QUjfl4k0c21bu+N+nkdLIkQAO97j3pEpijPnjwgNrOj3Bru+XUF4S9wlF5ywqYB3RE9auDGHzrqQRPuqdgxHXIuT/EYFLuEBx2+lMjaOcZrP/yc7brAqTYl0oq9+5Sl2LljyrHdp2SIxSa02ssB/VLU1FuAo+eRDmxyd9ZKtYuh9xGt+eQk2DjLEwV8Ect/6eI/1tuwVdf40gzb3nv164U5ftlTEZmBobb2A/aOkz2RxwdhUUZcc3T2A94e9JXiA3JPo9Og/UziYBXzA4MYItPCJVZS+AXbbuSi13lLoUy5YQu2C5mLnCoPPjhlIB2kGIfdEjDeY9CLO2zKR+Owvp8bkNNeXtLNrhEi80tmgh7YfRIbV4WsYVLxsV/Q25tttCXe8dxWFApjfrRrvI2VoH0qJyl2eGupSJZyWbfEj/5MWPBUgfO9ItAABJiYqZm6vpvdL5pnV+glNmHPiIQwKeu5bvmN2nNJq6q8fyV1uDu9g1crNBC9t1YikXzoN6FtUQbmCW0eTLssU3xq2CWvU7PTQAFGMHl9AFKAGemTWyAEfbBS/dYMtD5Sv7Ghf23AmJZRc7p0z5X5eV1aYi9OXDGLzkdupF1Ii0Ic55gM="
 #  # Ex. travis encrypt GH_USER=your_github_account --add
-#  - secure: "TBD"
+  - secure: "DY9Vyxf2MzdTha3WnJFlFoFsxUHnsmUTdtWebL/EsafN/Q7CsKi79z8fba24or84Q9yEvUXD6MIHnYJJ3eL/SFSwrjTMnWNCyTZNJtOKCm4Nl5mF21vdIA6FiLZNcB0W3x/OWh9+gLKdSNdFrnqdVcUVw0HipfEeYvGTrMXrfcSsFylhCsPSW25/GymqxXesoVwfai5QISeDy5oEebC4b9Pf0vPWjXwVeVcYLLCYEo1MGTXkImzAvFXH8YeeHp23hzB+Zvtz6Zcz7e9q/wrzhOyuCAyQjd2In8DW3FdLBXQAJTuB0Sc4I8mGIXRADhMjwjbhBTJ1bIW50vwkO93bdf3tFOdUioFXeXRxK8egKqopERxQEoGy1ojGG6xO/ESdUtF/Megf7C2+/wMzCRmmHAKkNaJ2k5Gz2tXaiDCDp3d1TgaPlXIVMhI5y4nf9/JuGeLujfNbC9PxyCf+qhj4nvlODIZuNFCYs5mcuNM5mnMS0vFD2Uca5gutuNzMPqvOZkfmUU2nlYzB7e8sRhyzTm/TpXxEew3PJvSEq854jOv7mk6ebsemQKIjy5d1hIq3XMRAKp8wL9Kd93mM1Q9cNqp18pfns3hxRTNH4yBbFmc0t6SVWepnhlK0hDpaR6FGDvUrcmGMO0maW8tiqmhDSP0OsVbzVKMx+f3/mrvGenY="
 #  # Ex. travis encrypt GH_TOKEN=XXX-https://github.com/settings/tokens-XXX --add
 #  - secure: "TBD"
 #  # Ex. travis encrypt SONATYPE_USER=your_sonatype_account
 #  - secure: "TBD"
 #  # Ex. travis encrypt SONATYPE_PASSWORD=your_sonatype_password
 #  - secure: "TBD"
-
