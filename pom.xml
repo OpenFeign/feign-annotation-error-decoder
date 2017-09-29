@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>feign-annotation-error-decoder</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <name>Feign Annotation Error Decoder</name>
     <description>Feign Annotation Error Decoder</description>
     <url>https://github.com/OpenFeign/feign-annotation-error-decoder</url>
