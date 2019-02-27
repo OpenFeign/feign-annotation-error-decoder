@@ -1,5 +1,6 @@
 package feign.error;
 
+import feign.Request;
 import feign.Response;
 
 import java.nio.charset.Charset;
@@ -32,6 +33,7 @@ public abstract class AbstractAnnotationErrorDecoderTest<T> {
             .status(status)
             .body(body, Charset.forName("UTF-8"))
             .headers(headers)
+            .request(Request.create(Request.HttpMethod.GET, "http://test", headers, null))
             .build();
     }
 }

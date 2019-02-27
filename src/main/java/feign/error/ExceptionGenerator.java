@@ -1,5 +1,6 @@
 package feign.error;
 
+import feign.Request;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
@@ -27,6 +28,7 @@ class ExceptionGenerator {
             .status(500)
             .body((Response.Body) null)
             .headers(testHeaders)
+            .request(Request.create(Request.HttpMethod.GET, "http://test", testHeaders, null))
             .build();
     }
 
