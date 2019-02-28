@@ -131,7 +131,11 @@ class ComplexPojoException extends Exception {
 
     @FeignExceptionConstructor
     public ComplexPojoException(GithubExceptionResponse body) {
-
+        if (body != null) {
+            // extract data
+        } else {
+            // fallback code
+        }
     }
 }
 //The pojo can then be anything you'd like provided the decoder can manage it
@@ -141,3 +145,6 @@ class GithubExceptionResponse {
     public List<String> urlsForHelp;
 }
 ```
+
+It's worth noting that at setup/startup time, the generators are checked with a null value of the body.
+If you don't do the null-checker, you'll get an NPE and startup will fail.
