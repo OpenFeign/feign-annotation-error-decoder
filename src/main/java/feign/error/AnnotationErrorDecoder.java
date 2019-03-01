@@ -123,6 +123,10 @@ public class AnnotationErrorDecoder implements ErrorDecoder {
           return errorHandling;
         }
       }
+      // Finally, if there's a superclass that isn't Object check if the superclass has anything
+      if (!apiType.isInterface() && !apiType.getSuperclass().equals(Object.class)) {
+        return readErrorHandlingIncludingInherited(apiType.getSuperclass());
+      }
       return Optional.empty();
     }
 
