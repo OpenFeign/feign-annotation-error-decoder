@@ -159,7 +159,7 @@ if ! is_pull_request && build_started_by_tag; then
 fi
 
 # skip license on travis due to #1512
-./mvnw install -nsu -Dlicense.skip=true
+./mvnw install -nsu -Dlicense.skip=true -Dgpg.skip=true
 
 # formatter errors:
 if [ -z $(git status --porcelain) ];
