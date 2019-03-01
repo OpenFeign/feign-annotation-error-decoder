@@ -19,6 +19,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.PARAMETER } )
+@Target({ElementType.PARAMETER})
 public @interface ResponseHeaders {
 }
