@@ -19,10 +19,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface ErrorHandling {
-    ErrorCodes[] codeSpecific() default {};
-    Class<? extends Exception> defaultException() default NO_DEFAULT.class;
+  ErrorCodes[] codeSpecific() default {};
 
-    final class NO_DEFAULT extends Exception {}
+  Class<? extends Exception> defaultException() default NO_DEFAULT.class;
+
+  final class NO_DEFAULT extends Exception {
+  }
 }
