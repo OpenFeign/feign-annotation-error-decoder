@@ -20,6 +20,7 @@ import feign.codec.ErrorDecoder;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static feign.Feign.configKey;
 
@@ -80,8 +81,9 @@ public class AnnotationErrorDecoder implements ErrorDecoder {
                 .build();
             Map<Integer, ExceptionGenerator> classLevelStatusCodeDefinitions = new HashMap<Integer, ExceptionGenerator>();
 
-            if(apiType.isAnnotationPresent(ErrorHandling.class)) {
-                ErrorHandlingDefinition classErrorHandlingDefinition = readAnnotation(apiType.getAnnotation(ErrorHandling.class), responseBodyDecoder);
+            Optional<ErrorHandling> classLevelErrorHandling = readErrorHandlingIncludingInherited(apiType);
+            if(classLevelErrorHandling.isPresent()) {
+                ErrorHandlingDefinition classErrorHandlingDefinition = readAnnotation(classLevelErrorHandling.get(), responseBodyDecoder);
                 classLevelDefault = classErrorHandlingDefinition.defaultThrow;
                 classLevelStatusCodeDefinitions = classErrorHandlingDefinition.statusCodesMap;
             }
@@ -103,6 +105,19 @@ public class AnnotationErrorDecoder implements ErrorDecoder {
             }
 
             return methodErrorHandlerMap;
+        }
+
+        Optional<ErrorHandling> readErrorHandlingIncludingInherited(Class<?> apiType) {
+            if(apiType.isAnnotationPresent(ErrorHandling.class)) {
+                return Optional.of(apiType.getAnnotation(ErrorHandling.class));
+            }
+            for(Class<?> parentInterface: apiType.getInterfaces()) {
+                Optional<ErrorHandling> errorHandling = readErrorHandlingIncludingInherited(parentInterface);
+                if(errorHandling.isPresent()) {
+                    return errorHandling;
+                }
+            }
+            return Optional.empty();
         }
 
         static ErrorHandlingDefinition readAnnotation(ErrorHandling errorHandling, Decoder responseBodyDecoder) {

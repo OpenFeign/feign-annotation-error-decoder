@@ -77,7 +77,7 @@ GitHub github = Feign.builder()
  
 ## Complex Exceptions
 
-Finally, Any exception can be used if they have a default constructor:
+Any exception can be used if they have a default constructor:
 
 ```java
 class DefaultConstructorException extends Exception {}
@@ -148,3 +148,85 @@ class GithubExceptionResponse {
 
 It's worth noting that at setup/startup time, the generators are checked with a null value of the body.
 If you don't do the null-checker, you'll get an NPE and startup will fail.
+
+
+## Inheriting from other interface definitions
+You can create a client interface that inherits from a different one. However, there are some limitations that
+you should be aware of (for most cases, these shouldn't be an issue):
+* The inheritance is not natural java inheritance of annotations - as these don't work on interfaces
+* Instead, the error looks at the class and if it finds the `@ErrorHandling` annotation, it uses that one.
+* If not, it will look at *all* the interfaces the main interface `extends` - but it does so in the order the
+java API gives it - so order is not guaranteed.
+* If it finds the annotation in one of those parents, it uses that definition, without looking at any other
+* That means that if more than one interface was extended which contained the `@ErrorHandling` annotation, we can't
+really guarantee which one of the parents will be selected and you should really do handling at the child interface
+  * so far, the java API seems to return in order of definition after the `extends`, but it's a really bad practice
+  if you have to depend on that... so our suggestion: don't.
+
+That means that as long as you only ever extend from a base interface (where you may decide that all 404's are "NotFoundException", for example)
+then you should be ok. But if you get complex in polymorphism, all bets are off - so don't go crazy!
+
+Example:
+In the following code:
+* The base `FeignClientBase` interface defines a default set of exceptions at class level
+* the `GitHub1` and `GitHub2` interfaces will inherit the class-level error handling, which means that
+any 401/403/404 will be handled correctly (provided the method doesn't specify a more specific exception)
+* the `GitHub3` interface however, by defining its own error handling, will handle all 401's, but not the
+403/404's since there's no merging/etc (not really in the plan to implement either...)
+```java
+
+@ErrorHandling(codeSpecific =
+    {
+        @ErrorCodes( codes = {401}, generate = UnAuthorizedException.class),
+        @ErrorCodes( codes = {403}, generate = ForbiddenException.class),
+        @ErrorCodes( codes = {404}, generate = UnknownItemException.class),
+    },
+    defaultException = ClassLevelDefaultException.class
+)
+interface FeignClientBase {}
+
+interface GitHub1 extends FeignClientBase {
+
+    @ErrorHandling(codeSpecific =
+        {
+            @ErrorCodes( codes = {404}, generate = NonExistentRepoException.class),
+            @ErrorCodes( codes = {502, 503, 504}, generate = RetryAfterCertainTimeException.class),
+        },
+        defaultException = FailedToGetContributorsException.class
+    )
+    @RequestLine("GET /repos/{owner}/{repo}/contributors")
+    List<Contributor> contributors(@Param("owner") String owner, @Param("repo") String repo);
+}
+
+interface GitHub2 extends FeignClientBase {
+
+    @ErrorHandling(codeSpecific =
+        {
+            @ErrorCodes( codes = {404}, generate = NonExistentRepoException.class),
+            @ErrorCodes( codes = {502, 503, 504}, generate = RetryAfterCertainTimeException.class),
+        },
+        defaultException = FailedToGetContributorsException.class
+    )
+    @RequestLine("GET /repos/{owner}/{repo}/contributors")
+    List<Contributor> contributors(@Param("owner") String owner, @Param("repo") String repo);
+}
+
+@ErrorHandling(codeSpecific =
+    {
+        @ErrorCodes( codes = {401}, generate = UnAuthorizedException.class)
+    },
+    defaultException = ClassLevelDefaultException.class
+)
+interface GitHub3 extends FeignClientBase {
+
+    @ErrorHandling(codeSpecific =
+        {
+            @ErrorCodes( codes = {404}, generate = NonExistentRepoException.class),
+            @ErrorCodes( codes = {502, 503, 504}, generate = RetryAfterCertainTimeException.class),
+        },
+        defaultException = FailedToGetContributorsException.class
+    )
+    @RequestLine("GET /repos/{owner}/{repo}/contributors")
+    List<Contributor> contributors(@Param("owner") String owner, @Param("repo") String repo);
+}
+```
