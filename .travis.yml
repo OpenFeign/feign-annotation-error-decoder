@@ -36,8 +36,8 @@ matrix:
 #removing openjdk8 from matrix for now as it causes issues on release
 #    - os: linux
 #      jdk: openjdk8
-    - os: linux
-      jdk: openjdk11
+#    - os: linux
+#      jdk: openjdk11
 
 # Don't build release tags. This avoids publish conflicts because the version commit exists both on master and the release tag.
 # See https://github.com/travis-ci/travis-ci/issues/1532
