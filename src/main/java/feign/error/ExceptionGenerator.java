@@ -15,12 +15,14 @@ package feign.error;
 
 import feign.Request;
 import feign.Response;
+import feign.Types;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,11 +48,11 @@ class ExceptionGenerator {
   private final Integer bodyIndex;
   private final Integer headerMapIndex;
   private final Integer numOfParams;
-  private final Class<?> bodyType;
+  private final Type bodyType;
   private final Class<? extends Exception> exceptionType;
   private final Decoder bodyDecoder;
 
-  ExceptionGenerator(Integer bodyIndex, Integer headerMapIndex, Integer numOfParams, Class<?> bodyType,
+  ExceptionGenerator(Integer bodyIndex, Integer headerMapIndex, Integer numOfParams, Type bodyType,
       Class<? extends Exception> exceptionType, Decoder bodyDecoder) {
     this.bodyIndex = bodyIndex;
     this.headerMapIndex = headerMapIndex;
@@ -67,7 +69,7 @@ class ExceptionGenerator {
     Class<?>[] paramClasses = new Class[numOfParams];
     Object[] paramValues = new Object[numOfParams];
     if (bodyIndex >= 0) {
-      paramClasses[bodyIndex] = bodyType;
+      paramClasses[bodyIndex] = Types.getRawType(bodyType);
       paramValues[bodyIndex] = resolveBody(response);
     }
     if (headerMapIndex >= 0) {
@@ -84,7 +86,7 @@ class ExceptionGenerator {
   }
 
   private Object resolveBody(Response response) {
-    if (bodyType.isInstance(response)) {
+    if (bodyType instanceof Class<?> && ((Class<?>) bodyType).isInstance(response)) {
       return response;
     }
     try {
@@ -114,13 +116,13 @@ class ExceptionGenerator {
 
     public ExceptionGenerator build() {
       Constructor<? extends Exception> constructor = getConstructor(exceptionType);
-      Class<?>[] parameterTypes = constructor.getParameterTypes();
+      Type[] parameterTypes = constructor.getGenericParameterTypes();
       Annotation[][] parametersAnnotations = constructor.getParameterAnnotations();
 
       Integer bodyIndex = -1;
       Integer headerMapIndex = -1;
       Integer numOfParams = parameterTypes.length;
-      Class<?> bodyType = null;
+      Type bodyType = null;
 
       for (int i = 0; i < parameterTypes.length; i++) {
         Annotation[] paramAnnotations = parametersAnnotations[i];
@@ -129,7 +131,7 @@ class ExceptionGenerator {
           if (annotation.annotationType().equals(ResponseHeaders.class)) {
             checkState(headerMapIndex == -1,
                 "Cannot have two parameters tagged with @ResponseHeaders");
-            checkState(parameterTypes[i].equals(Map.class),
+            checkState(Types.getRawType(parameterTypes[i]).equals(Map.class),
                 "Response Header map must be of type Map, but was %s", parameterTypes[i]);
             headerMapIndex = i;
             foundAnnotation = true;
