@@ -46,11 +46,11 @@ class ExceptionGenerator {
   private final Integer bodyIndex;
   private final Integer headerMapIndex;
   private final Integer numOfParams;
-  private final Class bodyType;
+  private final Class<?> bodyType;
   private final Class<? extends Exception> exceptionType;
   private final Decoder bodyDecoder;
 
-  ExceptionGenerator(Integer bodyIndex, Integer headerMapIndex, Integer numOfParams, Class bodyType,
+  ExceptionGenerator(Integer bodyIndex, Integer headerMapIndex, Integer numOfParams, Class<?> bodyType,
       Class<? extends Exception> exceptionType, Decoder bodyDecoder) {
     this.bodyIndex = bodyIndex;
     this.headerMapIndex = headerMapIndex;
@@ -84,7 +84,7 @@ class ExceptionGenerator {
   }
 
   private Object resolveBody(Response response) {
-    if (bodyType.getClass().equals(Response.class)) {
+    if (bodyType.isInstance(response)) {
       return response;
     }
     try {
@@ -120,7 +120,7 @@ class ExceptionGenerator {
       Integer bodyIndex = -1;
       Integer headerMapIndex = -1;
       Integer numOfParams = parameterTypes.length;
-      Class bodyType = null;
+      Class<?> bodyType = null;
 
       for (int i = 0; i < parameterTypes.length; i++) {
         Annotation[] paramAnnotations = parametersAnnotations[i];
