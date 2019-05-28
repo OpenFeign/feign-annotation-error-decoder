@@ -13,6 +13,8 @@
  */
 package feign.error;
 
+import feign.codec.Decoder;
+import feign.optionals.OptionalDecoder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static feign.error.AnnotationErrorDecoderExceptionConstructorsTest.TestClientInterfaceWithDifferentExceptionConstructors;
 import static feign.error.AnnotationErrorDecoderExceptionConstructorsTest.TestClientInterfaceWithDifferentExceptionConstructors.*;
@@ -69,6 +72,8 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
             NON_NULL_HEADERS},
         {"test Declared Constructor", 509,
             DefinedConstructorWithAnnotationForNonSupportedBody.class, NULL_BODY, NO_HEADERS},
+        {"test Declared Constructor", 510,
+            DefinedConstructorWithAnnotationForOptionalBody.class, Optional.of(NON_NULL_BODY), NO_HEADERS},
     });
   }
 
@@ -91,7 +96,9 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
   public void test() throws Exception {
 
     AnnotationErrorDecoder decoder = AnnotationErrorDecoder
-        .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class).build();
+        .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class)
+        .withResponseBodyDecoder(new OptionalDecoder(new Decoder.Default()))
+        .build();
 
     Exception genericException = decoder.decode(feignConfigKey("method1Test"),
         testResponse(errorCode, NON_NULL_BODY, NON_NULL_HEADERS));
@@ -122,8 +129,9 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
         @ErrorCodes(codes = {508},
             generate = DefinedConstructorWithAnnotationForHeadersButNotForBody.class),
         @ErrorCodes(codes = {509},
-            generate = DefinedConstructorWithAnnotationForNonSupportedBody.class)
-
+            generate = DefinedConstructorWithAnnotationForNonSupportedBody.class),
+        @ErrorCodes(codes = {510},
+            generate = DefinedConstructorWithAnnotationForOptionalBody.class)
     })
     void method1Test();
 
@@ -192,6 +200,24 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
 
       @FeignExceptionConstructor
       public DefinedConstructorWithAnnotationForBody(@ResponseBody String body) {
+        this.body = body;
+      }
+
+      @Override
+      public Object body() {
+        return body;
+      }
+    }
+
+    class DefinedConstructorWithAnnotationForOptionalBody extends ParametersException {
+      Optional<String> body;
+
+      public DefinedConstructorWithAnnotationForOptionalBody() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithAnnotationForOptionalBody(@ResponseBody Optional<String> body) {
         this.body = body;
       }
 
