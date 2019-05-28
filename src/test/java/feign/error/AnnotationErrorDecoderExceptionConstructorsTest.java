@@ -73,7 +73,8 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
         {"test Declared Constructor", 509,
             DefinedConstructorWithAnnotationForNonSupportedBody.class, NULL_BODY, NO_HEADERS},
         {"test Declared Constructor", 510,
-            DefinedConstructorWithAnnotationForOptionalBody.class, Optional.of(NON_NULL_BODY), NO_HEADERS},
+            DefinedConstructorWithAnnotationForOptionalBody.class, Optional.of(NON_NULL_BODY),
+            NO_HEADERS},
     });
   }
 
