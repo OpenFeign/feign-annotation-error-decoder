@@ -46,15 +46,17 @@ class ExceptionGenerator {
   }
 
   private final Integer bodyIndex;
+  private final Integer requestIndex;
   private final Integer headerMapIndex;
   private final Integer numOfParams;
   private final Type bodyType;
   private final Class<? extends Exception> exceptionType;
   private final Decoder bodyDecoder;
 
-  ExceptionGenerator(Integer bodyIndex, Integer headerMapIndex, Integer numOfParams, Type bodyType,
+  ExceptionGenerator(Integer bodyIndex, Integer requestIndex, Integer headerMapIndex, Integer numOfParams, Type bodyType,
       Class<? extends Exception> exceptionType, Decoder bodyDecoder) {
     this.bodyIndex = bodyIndex;
+    this.requestIndex = requestIndex;
     this.headerMapIndex = headerMapIndex;
     this.numOfParams = numOfParams;
     this.bodyType = bodyType;
@@ -71,6 +73,10 @@ class ExceptionGenerator {
     if (bodyIndex >= 0) {
       paramClasses[bodyIndex] = Types.getRawType(bodyType);
       paramValues[bodyIndex] = resolveBody(response);
+    }
+    if (requestIndex >= 0) {
+      paramClasses[requestIndex] = Request.class;
+      paramValues[requestIndex] = response.request();
     }
     if (headerMapIndex >= 0) {
       paramValues[headerMapIndex] = response.headers();
@@ -120,6 +126,7 @@ class ExceptionGenerator {
       Annotation[][] parametersAnnotations = constructor.getParameterAnnotations();
 
       Integer bodyIndex = -1;
+      Integer requestIndex = -1;
       Integer headerMapIndex = -1;
       Integer numOfParams = parameterTypes.length;
       Type bodyType = null;
@@ -139,15 +146,22 @@ class ExceptionGenerator {
           }
         }
         if (!foundAnnotation) {
-          checkState(bodyIndex == -1,
-              "Cannot have two parameters either without annotations or with @ResponseBody annotation");
-          bodyIndex = i;
-          bodyType = parameterTypes[i];
+          if(parameterTypes[i].equals(Request.class)) {
+            checkState(requestIndex == -1,
+                    "Cannot have two parameters either without annotations or with object of type feign.Request");
+            requestIndex = i;
+          } else {
+            checkState(bodyIndex == -1,
+                    "Cannot have two parameters either without annotations or with @ResponseBody annotation");
+            bodyIndex = i;
+            bodyType = parameterTypes[i];
+          }
         }
       }
 
       ExceptionGenerator generator = new ExceptionGenerator(
           bodyIndex,
+          requestIndex,
           headerMapIndex,
           numOfParams,
           bodyType,

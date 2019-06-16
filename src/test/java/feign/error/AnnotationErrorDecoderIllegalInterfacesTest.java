@@ -15,6 +15,7 @@ package feign.error;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.Request;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -44,6 +45,8 @@ public class AnnotationErrorDecoderIllegalInterfacesTest {
             IllegalStateException.class, "Cannot generate exception - check constructor"},
         {IllegalTestClientInterfaceWithExceptionWithBadHeaderObjectParam.class,
             IllegalStateException.class, "Response Header map must be of type Map"},
+        {IllegalTestClientInterfaceWithExceptionWithTooManyRequestParams.class,
+            IllegalStateException.class, "Cannot have two parameters either without"}
     });
   }
 
@@ -105,6 +108,21 @@ public class AnnotationErrorDecoderIllegalInterfacesTest {
 
       @FeignExceptionConstructor
       public BadException(String body, @ResponseBody String otherBody) {
+
+      }
+    }
+  }
+
+  interface IllegalTestClientInterfaceWithExceptionWithTooManyRequestParams {
+    @ErrorHandling(codeSpecific = {
+            @ErrorCodes(codes = {404}, generate = BadException.class)
+    })
+    void method1Test();
+
+    class BadException extends Exception {
+
+      @FeignExceptionConstructor
+      public BadException(Request request1, Request request2) {
 
       }
     }
