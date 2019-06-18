@@ -115,7 +115,7 @@ public class AnnotationErrorDecoderIllegalInterfacesTest {
 
   interface IllegalTestClientInterfaceWithExceptionWithTooManyRequestParams {
     @ErrorHandling(codeSpecific = {
-            @ErrorCodes(codes = {404}, generate = BadException.class)
+        @ErrorCodes(codes = {404}, generate = BadException.class)
     })
     void method1Test();
 

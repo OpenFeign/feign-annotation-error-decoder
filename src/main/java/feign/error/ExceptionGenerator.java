@@ -53,7 +53,8 @@ class ExceptionGenerator {
   private final Class<? extends Exception> exceptionType;
   private final Decoder bodyDecoder;
 
-  ExceptionGenerator(Integer bodyIndex, Integer requestIndex, Integer headerMapIndex, Integer numOfParams, Type bodyType,
+  ExceptionGenerator(Integer bodyIndex, Integer requestIndex, Integer headerMapIndex,
+      Integer numOfParams, Type bodyType,
       Class<? extends Exception> exceptionType, Decoder bodyDecoder) {
     this.bodyIndex = bodyIndex;
     this.requestIndex = requestIndex;
@@ -146,13 +147,13 @@ class ExceptionGenerator {
           }
         }
         if (!foundAnnotation) {
-          if(parameterTypes[i].equals(Request.class)) {
+          if (parameterTypes[i].equals(Request.class)) {
             checkState(requestIndex == -1,
-                    "Cannot have two parameters either without annotations or with object of type feign.Request");
+                "Cannot have two parameters either without annotations or with object of type feign.Request");
             requestIndex = i;
           } else {
             checkState(bodyIndex == -1,
-                    "Cannot have two parameters either without annotations or with @ResponseBody annotation");
+                "Cannot have two parameters either without annotations or with @ResponseBody annotation");
             bodyIndex = i;
             bodyType = parameterTypes[i];
           }
