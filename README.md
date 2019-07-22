@@ -85,7 +85,7 @@ Any exception can be used if they have a default constructor:
 class DefaultConstructorException extends Exception {}
 ```
 
-However, if you want to have parameters (such  as the body in the error response or headers), you have to annotate its 
+However, if you want to have parameters (such  as the feign.Request object or response body or response headers), you have to annotate its 
 constructor appropriately (the body annotation is optional, provided there aren't paramters which will clash)
 
 All the following examples are valid exceptions:
@@ -97,11 +97,32 @@ class JustBody extends Exception {
 
     }
 }
+class JustRequest extends Exception {
+
+    @FeignExceptionConstructor
+    public JustRequest(Request request) {
+
+    }
+}
+class RequestAndResponseBody extends Exception {
+
+    @FeignExceptionConstructor
+    public RequestAndResponseBody(Request request, String body) {
+
+    }
+}
 //Headers must be of type Map<String, Collection<String>>
 class BodyAndHeaders extends Exception {
 
     @FeignExceptionConstructor
     public BodyAndHeaders(@ResponseBody String body, @ResponseHeaders Map<String, Collection<String>> headers) {
+
+    }
+}
+class RequestAndResponseBodyAndHeaders extends Exception {
+
+    @FeignExceptionConstructor
+    public RequestAndResponseBodyAndHeaders(Request request, @ResponseBody String body, @ResponseHeaders Map<String, Collection<String>> headers) {
 
     }
 }

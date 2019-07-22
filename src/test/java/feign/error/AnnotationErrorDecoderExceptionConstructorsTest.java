@@ -16,15 +16,13 @@ package feign.error;
 import feign.codec.Decoder;
 import feign.optionals.OptionalDecoder;
 import org.junit.Test;
+import org.junit.runner.Request;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.Parameter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import javax.swing.text.html.Option;
+import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static feign.error.AnnotationErrorDecoderExceptionConstructorsTest.TestClientInterfaceWithDifferentExceptionConstructors;
 import static feign.error.AnnotationErrorDecoderExceptionConstructorsTest.TestClientInterfaceWithDifferentExceptionConstructors.*;
@@ -37,6 +35,9 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
   private static final String NO_BODY = "NO BODY";
   private static final Object NULL_BODY = null;
   private static final String NON_NULL_BODY = "A GIVEN BODY";
+  private static final feign.Request REQUEST = feign.Request.create(feign.Request.HttpMethod.GET,
+      "http://test", Collections.emptyMap(), null);
+  private static final feign.Request NO_REQUEST = null;
   private static final Map<String, Collection<String>> NON_NULL_HEADERS =
       new HashMap<String, Collection<String>>();
   private static final Map<String, Collection<String>> NO_HEADERS = null;
@@ -51,30 +52,55 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
       name = "{0}: When error code ({1}) on method ({2}) should return exception type ({3})")
   public static Iterable<Object[]> data() {
     return Arrays.asList(new Object[][] {
-        {"Test Default Constructor", 500, DefaultConstructorException.class, NO_BODY, NO_HEADERS},
-        {"test Default Constructor", 501, DeclaredDefaultConstructorException.class, NO_BODY,
+        {"Test Default Constructor", 500, DefaultConstructorException.class, NO_REQUEST, NO_BODY,
+            NO_HEADERS},
+        {"test Default Constructor", 501, DeclaredDefaultConstructorException.class, NO_REQUEST,
+            NO_BODY,
             NO_HEADERS},
         {"test Default Constructor", 502,
-            DeclaredDefaultConstructorWithOtherConstructorsException.class, NO_BODY, NO_HEADERS},
+            DeclaredDefaultConstructorWithOtherConstructorsException.class, NO_REQUEST, NO_BODY,
+            NO_HEADERS},
         {"test Declared Constructor", 503, DefinedConstructorWithNoAnnotationForBody.class,
+            NO_REQUEST,
             NON_NULL_BODY, NO_HEADERS},
         {"test Declared Constructor", 504, DefinedConstructorWithAnnotationForBody.class,
-            NON_NULL_BODY, NO_HEADERS},
+            NO_REQUEST, NON_NULL_BODY, NO_HEADERS},
         {"test Declared Constructor", 505, DefinedConstructorWithAnnotationForBodyAndHeaders.class,
-            NON_NULL_BODY, NON_NULL_HEADERS},
+            NO_REQUEST, NON_NULL_BODY, NON_NULL_HEADERS},
         {"test Declared Constructor", 506,
-            DefinedConstructorWithAnnotationForBodyAndHeadersSecondOrder.class, NON_NULL_BODY,
+            DefinedConstructorWithAnnotationForBodyAndHeadersSecondOrder.class, NO_REQUEST,
+            NON_NULL_BODY,
             NON_NULL_HEADERS},
         {"test Declared Constructor", 507, DefinedConstructorWithAnnotationForHeaders.class,
-            NO_BODY, NON_NULL_HEADERS},
+            NO_REQUEST, NO_BODY, NON_NULL_HEADERS},
         {"test Declared Constructor", 508,
-            DefinedConstructorWithAnnotationForHeadersButNotForBody.class, NON_NULL_BODY,
+            DefinedConstructorWithAnnotationForHeadersButNotForBody.class, NO_REQUEST,
+            NON_NULL_BODY,
             NON_NULL_HEADERS},
         {"test Declared Constructor", 509,
-            DefinedConstructorWithAnnotationForNonSupportedBody.class, NULL_BODY, NO_HEADERS},
-        {"test Declared Constructor", 510,
-            DefinedConstructorWithAnnotationForOptionalBody.class, Optional.of(NON_NULL_BODY),
+            DefinedConstructorWithAnnotationForNonSupportedBody.class, NO_REQUEST, NULL_BODY,
             NO_HEADERS},
+        {"test Declared Constructor", 510,
+            DefinedConstructorWithAnnotationForOptionalBody.class, NO_REQUEST,
+            Optional.of(NON_NULL_BODY),
+            NO_HEADERS},
+        {"test Declared Constructor", 511,
+            DefinedConstructorWithRequest.class, REQUEST, NO_BODY,
+            NO_HEADERS},
+        {"test Declared Constructor", 512,
+            DefinedConstructorWithRequestAndResponseBody.class, REQUEST, NON_NULL_BODY,
+            NO_HEADERS},
+        {"test Declared Constructor", 513,
+            DefinedConstructorWithRequestAndAnnotationForResponseBody.class, REQUEST, NON_NULL_BODY,
+            NO_HEADERS},
+        {"test Declared Constructor", 514,
+            DefinedConstructorWithRequestAndResponseHeadersAndResponseBody.class, REQUEST,
+            NON_NULL_BODY,
+            NON_NULL_HEADERS},
+        {"test Declared Constructor", 515,
+            DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody.class, REQUEST,
+            Optional.of(NON_NULL_BODY),
+            NON_NULL_HEADERS}
     });
   }
 
@@ -88,9 +114,12 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
   public Class<? extends Exception> expectedExceptionClass;
 
   @Parameter(3)
-  public Object expectedBody;
+  public Object expectedRequest;
 
   @Parameter(4)
+  public Object expectedBody;
+
+  @Parameter(5)
   public Map<String, Collection<String>> expectedHeaders;
 
   @Test
@@ -132,13 +161,27 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
         @ErrorCodes(codes = {509},
             generate = DefinedConstructorWithAnnotationForNonSupportedBody.class),
         @ErrorCodes(codes = {510},
-            generate = DefinedConstructorWithAnnotationForOptionalBody.class)
+            generate = DefinedConstructorWithAnnotationForOptionalBody.class),
+        @ErrorCodes(codes = {511},
+            generate = DefinedConstructorWithRequest.class),
+        @ErrorCodes(codes = {512},
+            generate = DefinedConstructorWithRequestAndResponseBody.class),
+        @ErrorCodes(codes = {513},
+            generate = DefinedConstructorWithRequestAndAnnotationForResponseBody.class),
+        @ErrorCodes(codes = {514},
+            generate = DefinedConstructorWithRequestAndResponseHeadersAndResponseBody.class),
+        @ErrorCodes(codes = {515},
+            generate = DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody.class)
     })
     void method1Test();
 
     class ParametersException extends Exception {
       public Object body() {
         return NO_BODY;
+      }
+
+      public feign.Request request() {
+        return null;
       }
 
       public Map<String, Collection<String>> headers() {
@@ -190,6 +233,168 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
         return body;
       }
 
+    }
+
+    class DefinedConstructorWithRequest extends ParametersException {
+      feign.Request request;
+
+      public DefinedConstructorWithRequest() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithRequest(feign.Request request) {
+        this.request = request;
+      }
+
+      public DefinedConstructorWithRequest(TestPojo testPojo) {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @Override
+      public feign.Request request() {
+        return request;
+      }
+
+    }
+
+    class DefinedConstructorWithRequestAndResponseBody extends ParametersException {
+      feign.Request request;
+      String body;
+
+      public DefinedConstructorWithRequestAndResponseBody() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithRequestAndResponseBody(feign.Request request, String body) {
+        this.request = request;
+        this.body = body;
+      }
+
+      public DefinedConstructorWithRequestAndResponseBody(TestPojo testPojo) {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @Override
+      public feign.Request request() {
+        return request;
+      }
+
+      @Override
+      public String body() {
+        return body;
+      }
+    }
+
+    class DefinedConstructorWithRequestAndAnnotationForResponseBody extends ParametersException {
+      feign.Request request;
+      String body;
+
+      public DefinedConstructorWithRequestAndAnnotationForResponseBody() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithRequestAndAnnotationForResponseBody(feign.Request request,
+          @ResponseBody String body) {
+        this.request = request;
+        this.body = body;
+      }
+
+      public DefinedConstructorWithRequestAndAnnotationForResponseBody(TestPojo testPojo) {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @Override
+      public feign.Request request() {
+        return request;
+      }
+
+      @Override
+      public String body() {
+        return body;
+      }
+    }
+
+    class DefinedConstructorWithRequestAndResponseHeadersAndResponseBody
+        extends ParametersException {
+      feign.Request request;
+      String body;
+      Map headers;
+
+      public DefinedConstructorWithRequestAndResponseHeadersAndResponseBody() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithRequestAndResponseHeadersAndResponseBody(feign.Request request,
+          @ResponseHeaders Map headers,
+          @ResponseBody String body) {
+        this.request = request;
+        this.body = body;
+        this.headers = headers;
+      }
+
+      public DefinedConstructorWithRequestAndResponseHeadersAndResponseBody(TestPojo testPojo) {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @Override
+      public feign.Request request() {
+        return request;
+      }
+
+      @Override
+      public Map headers() {
+        return headers;
+      }
+
+      @Override
+      public String body() {
+        return body;
+      }
+    }
+
+    class DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody
+        extends ParametersException {
+      feign.Request request;
+      Optional<String> body;
+      Map headers;
+
+      public DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody() {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @FeignExceptionConstructor
+      public DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody(
+          feign.Request request,
+          @ResponseHeaders Map headers,
+          @ResponseBody Optional<String> body) {
+        this.request = request;
+        this.body = body;
+        this.headers = headers;
+      }
+
+      public DefinedConstructorWithRequestAndResponseHeadersAndOptionalResponseBody(
+          TestPojo testPojo) {
+        throw new UnsupportedOperationException("Should not be called");
+      }
+
+      @Override
+      public feign.Request request() {
+        return request;
+      }
+
+      @Override
+      public Map headers() {
+        return headers;
+      }
+
+      @Override
+      public Object body() {
+        return body;
+      }
     }
 
     class DefinedConstructorWithAnnotationForBody extends ParametersException {
