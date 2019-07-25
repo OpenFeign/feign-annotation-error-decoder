@@ -14,7 +14,6 @@
 package feign.error;
 
 import feign.Response;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -30,18 +29,9 @@ public @interface ErrorHandling {
   Class<? extends Exception> defaultException() default NO_DEFAULT.class;
 
   final class NO_DEFAULT extends Exception {
-
-      /**
-       * For backward compatibility.
-       */
-      @Deprecated
-      public NO_DEFAULT() {
-      }
-
-      @FeignExceptionConstructor
-      public NO_DEFAULT(@ResponseBody Response response) {
-          super("Endpoint responded with " + response.status() + ", reason: " + response.reason());
-      }
-
+    @FeignExceptionConstructor
+    public NO_DEFAULT(@ResponseBody Response response) {
+      super("Endpoint responded with " + response.status() + ", reason: " + response.reason());
+    }
   }
 }

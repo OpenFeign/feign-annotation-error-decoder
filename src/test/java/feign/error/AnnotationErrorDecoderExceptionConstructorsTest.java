@@ -142,16 +142,16 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
   @Test
   public void testIfExceptionIsNotInTheList() throws Exception {
     AnnotationErrorDecoder decoder = AnnotationErrorDecoder
-            .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class)
-            .withResponseBodyDecoder(new OptionalDecoder(new Decoder.Default()))
-            .build();
+        .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class)
+        .withResponseBodyDecoder(new OptionalDecoder(new Decoder.Default()))
+        .build();
 
     Exception genericException = decoder.decode(feignConfigKey("method1Test"),
-            testResponse(-1, NON_NULL_BODY, NON_NULL_HEADERS));
+        testResponse(-1, NON_NULL_BODY, NON_NULL_HEADERS));
 
     assertThat(genericException)
-            .isInstanceOf(ErrorHandling.NO_DEFAULT.class)
-            .hasMessage("Endpoint responded with -1, reason: null");
+        .isInstanceOf(ErrorHandling.NO_DEFAULT.class)
+        .hasMessage("Endpoint responded with -1, reason: null");
   }
 
   interface TestClientInterfaceWithDifferentExceptionConstructors {
