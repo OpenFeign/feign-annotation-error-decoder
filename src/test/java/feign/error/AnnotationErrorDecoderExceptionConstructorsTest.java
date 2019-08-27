@@ -124,7 +124,6 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
 
   @Test
   public void test() throws Exception {
-
     AnnotationErrorDecoder decoder = AnnotationErrorDecoder
         .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class)
         .withResponseBodyDecoder(new OptionalDecoder(new Decoder.Default()))
@@ -133,13 +132,26 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
     Exception genericException = decoder.decode(feignConfigKey("method1Test"),
         testResponse(errorCode, NON_NULL_BODY, NON_NULL_HEADERS));
 
-    assertThat(genericException.getClass()).isEqualTo(expectedExceptionClass);
+    assertThat(genericException).isInstanceOf(expectedExceptionClass);
 
     ParametersException exception = (ParametersException) genericException;
     assertThat(exception.body()).isEqualTo(expectedBody);
     assertThat(exception.headers()).isEqualTo(expectedHeaders);
+  }
 
+  @Test
+  public void testIfExceptionIsNotInTheList() throws Exception {
+    AnnotationErrorDecoder decoder = AnnotationErrorDecoder
+        .builderFor(TestClientInterfaceWithDifferentExceptionConstructors.class)
+        .withResponseBodyDecoder(new OptionalDecoder(new Decoder.Default()))
+        .build();
 
+    Exception genericException = decoder.decode(feignConfigKey("method1Test"),
+        testResponse(-1, NON_NULL_BODY, NON_NULL_HEADERS));
+
+    assertThat(genericException)
+        .isInstanceOf(ErrorHandling.NO_DEFAULT.class)
+        .hasMessage("Endpoint responded with -1, reason: null");
   }
 
   interface TestClientInterfaceWithDifferentExceptionConstructors {
