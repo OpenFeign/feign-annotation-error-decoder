@@ -13,15 +13,14 @@
  */
 package feign.error;
 
+import feign.Request;
 import feign.codec.Decoder;
 import feign.optionals.OptionalDecoder;
 import org.junit.Test;
-import org.junit.runner.Request;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.junit.runners.Parameterized.Parameter;
-import javax.swing.text.html.Option;
 import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static feign.error.AnnotationErrorDecoderExceptionConstructorsTest.TestClientInterfaceWithDifferentExceptionConstructors;
@@ -36,7 +35,7 @@ public class AnnotationErrorDecoderExceptionConstructorsTest extends
   private static final Object NULL_BODY = null;
   private static final String NON_NULL_BODY = "A GIVEN BODY";
   private static final feign.Request REQUEST = feign.Request.create(feign.Request.HttpMethod.GET,
-      "http://test", Collections.emptyMap(), null);
+      "http://test", Collections.emptyMap(), Request.Body.empty(), null);
   private static final feign.Request NO_REQUEST = null;
   private static final Map<String, Collection<String>> NON_NULL_HEADERS =
       new HashMap<String, Collection<String>>();
